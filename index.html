@@ -1,0 +1,577 @@
+<html lang="it"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Registro PRC">
+<meta name="theme-color" content="#1a56db">
+<link rel="manifest" href="manifest.json">
+<title>Registro PRC</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,sans-serif;background:#f2f2f7;color:#1c1c1e;min-height:100vh}
+  /* HEADER */
+  .header{background:linear-gradient(135deg,#1a56db,#1e40af);color:#fff;padding:14px 16px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+  .header h1{font-size:18px;font-weight:700;letter-spacing:.2px}
+  .header-sub{font-size:11px;opacity:.8;margin-top:2px}
+  .header-actions{display:flex;gap:8px}
+  .icon-btn{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;white-space:nowrap}
+  /* SUMMARY */
+  .summary-section{background:#fff;border-bottom:1px solid #e5e5ea;padding:10px 12px}
+  .summary-title{font-size:11px;color:#8e8e93;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:600}
+  .summary-cards{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
+  .summary-cards::-webkit-scrollbar{display:none}
+  .s-card{flex:0 0 auto;background:#f0f6ff;border-radius:12px;padding:8px 12px;text-align:center;min-width:72px;border:1.5px solid #dbeafe}
+  .s-name{font-size:11px;color:#3b82f6;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px}
+  .s-hours{font-size:22px;font-weight:700;color:#1a56db;line-height:1.1;margin:2px 0}
+  .s-label{font-size:10px;color:#6b7280}
+  /* SETTINGS PANEL */
+  .settings-panel{background:#fff;border-bottom:1px solid #e5e5ea;overflow:hidden;max-height:0;transition:max-height .3s ease}
+  .settings-panel.open{max-height:500px}
+  .settings-inner{padding:14px 16px}
+  .settings-inner h3{font-size:14px;font-weight:600;margin-bottom:12px;color:#1c1c1e}
+  .teacher-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .input-group label{font-size:11px;color:#8e8e93;display:block;margin-bottom:3px;font-weight:500}
+  .input-group input{width:100%;padding:9px 11px;border:1.5px solid #e5e5ea;border-radius:10px;font-size:14px;background:#f9f9fb;-webkit-appearance:none}
+  .input-group input:focus{border-color:#1a56db;outline:none;background:#fff}
+  .date-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .settings-btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .btn{padding:10px 16px;border-radius:10px;border:none;font-size:14px;cursor:pointer;font-weight:600}
+  .btn-blue{background:#1a56db;color:#fff}
+  .btn-gray{background:#f2f2f7;color:#3c3c43}
+  .btn-red{background:#fee2e2;color:#dc2626}
+  .btn-green{background:#dcfce7;color:#16a34a}
+  /* MONTH NAV */
+  .month-nav{background:#fff;border-bottom:1px solid #e5e5ea;padding:10px 12px;display:flex;gap:6px;overflow-x:auto}
+  .month-nav::-webkit-scrollbar{display:none}
+  .m-btn{flex:0 0 auto;padding:6px 13px;border-radius:20px;border:1.5px solid #e5e5ea;background:#f9f9fb;font-size:13px;cursor:pointer;white-space:nowrap;font-weight:500;color:#3c3c43;transition:all .15s}
+  .m-btn.active{background:#1a56db;color:#fff;border-color:#1a56db}
+  /* DAY LIST */
+  .days-list{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+  .day-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid #f0f0f0}
+  .day-card.holiday{border-color:#fde68a;background:#fffbeb}
+  .day-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px}
+  .day-date{font-size:14px;font-weight:600;color:#1c1c1e}
+  .day-weekday{font-size:12px;color:#8e8e93;margin-right:6px}
+  .holiday-badge{background:#fef3c7;color:#d97706;font-size:11px;font-weight:600;padding:3px 8px;border-radius:8px}
+  .teachers-row{display:flex;gap:8px;padding:0 14px 12px;flex-wrap:wrap;align-items:flex-start}
+  .t-chip-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .t-chip{min-width:58px;padding:7px 10px;border-radius:10px;border:1.5px solid #e5e5ea;background:#f9f9fb;font-size:12px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;color:#6b7280;user-select:none;white-space:nowrap}
+  .t-chip.present{background:#22c55e;border-color:#16a34a;color:#fff}
+  .t-chip.hours-set{background:#15803d;border-color:#166534;color:#fff}
+  .hours-wrap{display:flex;align-items:center;gap:3px}
+  .hours-input{width:54px;padding:5px 6px;border:1.5px solid #d1d5db;border-radius:8px;text-align:center;font-size:13px;font-weight:600;-webkit-appearance:none;background:#fff}
+  .hours-input:focus{border-color:#1a56db;outline:none}
+  .hours-unit{font-size:11px;color:#6b7280;font-weight:500}
+  /* EMPTY STATE */
+  .empty-month{text-align:center;padding:32px;color:#8e8e93}
+  .empty-month p{font-size:15px}
+  /* BOTTOM BAR */
+  .bottom-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e5ea;padding:10px 16px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;justify-content:center;z-index:100}
+  .bb-btn{flex:1;max-width:160px;padding:11px 8px;border-radius:12px;border:none;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px}
+  .bb-save{background:#1a56db;color:#fff}
+  .bb-import{background:#f0f6ff;color:#1a56db;border:1.5px solid #bfdbfe}
+  .bb-export{background:#f0fdf4;color:#16a34a;border:1.5px solid #bbf7d0}
+  .spacer{height:80px}
+  /* TOAST */
+  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:#1c1c1e;color:#fff;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:500;opacity:0;transition:all .3s;z-index:999;white-space:nowrap;pointer-events:none}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  /* File input hidden */
+  #fileInput{display:none}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast">✓ Impostazioni salvate</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="header h1" style="font-size:18px;font-weight:700">📋 Registro PRC</div>
+    <div class="header-sub" id="headerSub">A.S. 2025/2026</div>
+  </div>
+  <div class="header-actions">
+    <button class="icon-btn" onclick="toggleSettings()">⚙️ Imposta</button>
+  </div>
+</div>
+
+<!-- SETTINGS PANEL -->
+<div class="settings-panel" id="settingsPanel">
+  <div class="settings-inner">
+    <h3>Configurazione</h3>
+    <div class="teacher-grid" id="teacherGrid"><div class="input-group"><label>Insegnante 1</label><input type="text" placeholder="Nome 1" id="t-inp-0"></div><div class="input-group"><label>Insegnante 2</label><input type="text" placeholder="Nome 2" id="t-inp-1"></div><div class="input-group"><label>Insegnante 3</label><input type="text" placeholder="Nome 3" id="t-inp-2"></div><div class="input-group"><label>Insegnante 4</label><input type="text" placeholder="Nome 4" id="t-inp-3"></div><div class="input-group"><label>Insegnante 5</label><input type="text" placeholder="Nome 5" id="t-inp-4"></div></div>
+    <div class="date-row">
+      <div class="input-group">
+        <label>Inizio anno scolastico</label>
+        <input type="date" id="startDate" value="2025-09-08" onchange="updateDates()">
+      </div>
+      <div class="input-group">
+        <label>Fine anno scolastico</label>
+        <input type="date" id="endDate" value="2026-06-13" onchange="updateDates()">
+      </div>
+    </div>
+    <div class="settings-btns">
+      <button class="btn btn-blue" onclick="applySettings()">✓ Applica</button>
+      <button class="btn btn-red" onclick="confirmReset()">🗑 Azzera dati</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="summary-section">
+  <div class="summary-title">Ore PRC totali anno</div>
+  <div class="summary-cards" id="summaryCards"><div class="s-card"><div class="s-name">Bianco</div><div class="s-hours">0</div><div class="s-label">ore PRC</div></div><div class="s-card"><div class="s-name">Boniotti</div><div class="s-hours">0</div><div class="s-label">ore PRC</div></div><div class="s-card"><div class="s-name">Scotti</div><div class="s-hours">0</div><div class="s-label">ore PRC</div></div><div class="s-card"><div class="s-name">Stivanello</div><div class="s-hours">0</div><div class="s-label">ore PRC</div></div></div>
+</div>
+
+<!-- MONTH NAV -->
+<div class="month-nav" id="monthNav"><button class="m-btn active">Set 25</button><button class="m-btn">Ott 25</button><button class="m-btn">Nov 25</button><button class="m-btn">Dic 25</button><button class="m-btn">Gen 26</button><button class="m-btn">Feb 26</button><button class="m-btn">Mar 26</button><button class="m-btn">Apr 26</button><button class="m-btn">Mag 26</button><button class="m-btn">Giu 26</button></div>
+
+<!-- DAYS LIST -->
+<div class="days-list" id="daysList"><div class="day-card" id="card-2025-09-08"><div class="day-header"><div><span class="day-weekday">Lunedì</span><span class="day-date">8 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-08" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-08" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-08" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-08" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div><div class="day-card" id="card-2025-09-09"><div class="day-header"><div><span class="day-weekday">Martedì</span><span class="day-date">9 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-09" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-09" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-09" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-09" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div><div class="day-card" id="card-2025-09-10"><div class="day-header"><div><span class="day-weekday">Mercoledì</span><span class="day-date">10 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-10" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-10" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-10" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-10" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div><div class="day-card" id="card-2025-09-11"><div class="day-header"><div><span class="day-weekday">Giovedì</span><span class="day-date">11 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-11" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-11" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-11" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-11" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div><div class="day-card" id="card-2025-09-12"><div class="day-header"><div><span class="day-weekday">Venerdì</span><span class="day-date">12 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-12" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-12" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-12" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-12" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div><div class="day-card" id="card-2025-09-15"><div class="day-header"><div><span class="day-weekday">Lunedì</span><span class="day-date">15 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-15" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-15" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-15" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-15" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div><div class="day-card" id="card-2025-09-16"><div class="day-header"><div><span class="day-weekday">Martedì</span><span class="day-date">16 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-16" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-16" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-16" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-16" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div><div class="day-card" id="card-2025-09-17"><div class="day-header"><div><span class="day-weekday">Mercoledì</span><span class="day-date">17 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-17" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-17" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-17" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-17" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div><div class="day-card" id="card-2025-09-18"><div class="day-header"><div><span class="day-weekday">Giovedì</span><span class="day-date">18 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-18" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-18" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-18" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-18" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div><div class="day-card" id="card-2025-09-19"><div class="day-header"><div><span class="day-weekday">Venerdì</span><span class="day-date">19 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-19" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-19" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-19" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-19" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div><div class="day-card" id="card-2025-09-22"><div class="day-header"><div><span class="day-weekday">Lunedì</span><span class="day-date">22 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-22" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-22" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-22" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-22" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div><div class="day-card" id="card-2025-09-23"><div class="day-header"><div><span class="day-weekday">Martedì</span><span class="day-date">23 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-23" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-23" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-23" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-23" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div><div class="day-card" id="card-2025-09-24"><div class="day-header"><div><span class="day-weekday">Mercoledì</span><span class="day-date">24 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-24" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-24" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-24" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-24" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div><div class="day-card" id="card-2025-09-25"><div class="day-header"><div><span class="day-weekday">Giovedì</span><span class="day-date">25 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-25" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-25" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-25" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-25" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div><div class="day-card" id="card-2025-09-26"><div class="day-header"><div><span class="day-weekday">Venerdì</span><span class="day-date">26 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-26" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-26" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-26" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-26" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div><div class="day-card" id="card-2025-09-29"><div class="day-header"><div><span class="day-weekday">Lunedì</span><span class="day-date">29 Settembre</span></div></div><div class="teachers-row"><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-29" data-tidx="0" title="Bianco">Bianco</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-29" data-tidx="1" title="Boniotti">Boniotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-29" data-tidx="2" title="Scotti">Scotti</div></div><div class="t-chip-wrap"><div class="t-chip" data-dk="2025-09-29" data-tidx="3" title="Stivanello">Stivanello</div></div></div></div></div>
+
+<div class="spacer"></div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <button class="bb-btn bb-save" onclick="saveAsHTML()">💾 Backup</button>
+  <button class="bb-btn bb-export" onclick="exportCSV()">📊 CSV</button>
+  <button class="bb-btn bb-import" onclick="document.getElementById('fileInput').click()">📥 Importa</button>
+</div>
+
+<input type="file" id="fileInput" accept=".html,.json" onchange="importData(event)">
+
+<script>
+// ===================== EMBEDDED STATE (do not edit this line) =====================
+var SAVED_STATE = {"teachers":["Bianco","Boniotti","Scotti","Stivanello",""],"startDate":"2025-09-08","endDate":"2026-06-13","attendance":{}}; // __SAVED_STATE__
+// ===================== END EMBEDDED STATE =====================
+
+const MONTHS_IT = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+const DAYS_IT = ["Dom","Lun","Mar","Mer","Gio","Ven","Sab"];
+const DAYS_FULL = ["Domenica","Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato"];
+
+const HOLIDAYS = {
+  "2025-11-01":"Tutti i Santi",
+  "2025-12-08":"Immacolata",
+  "2025-12-25":"Natale",
+  "2025-12-26":"S. Stefano",
+  "2026-01-01":"Capodanno",
+  "2026-01-06":"Epifania",
+  "2026-04-05":"Pasqua",
+  "2026-04-06":"Lunedì Angelo",
+  "2026-04-25":"Liberazione",
+  "2026-05-01":"Festa Lavoro",
+  "2026-06-02":"Rep. Italiana"
+};
+
+// STATE
+let state = {
+  teachers: ["Insegnante 1","Insegnante 2","Insegnante 3","",""],
+  startDate: "2025-09-08",
+  endDate: "2026-06-13",
+  attendance: {}
+};
+
+function loadFromStorage() {
+  try {
+    const saved = localStorage.getItem('prc_state');
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return null;
+}
+
+function autoSave() {
+  try {
+    localStorage.setItem('prc_state', JSON.stringify(state));
+  } catch(e) {}
+}
+
+// Priorità: localStorage > SAVED_STATE embedded
+const fromStorage = loadFromStorage();
+if (fromStorage) {
+  state = Object.assign(state, fromStorage);
+} else if (SAVED_STATE) {
+  state = Object.assign(state, SAVED_STATE);
+}
+
+let currentMonthIndex = 0;
+let allMonths = [];
+let settingsOpen = false;
+
+// ---- UTILS ----
+function dateKey(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+
+function isWeekend(d) { const w=d.getDay(); return w===0||w===6; }
+
+function getHoliday(dk) { return HOLIDAYS[dk]||null; }
+
+function generateMonths() {
+  const start = new Date(state.startDate);
+  const end = new Date(state.endDate);
+  const months = [];
+  let cur = new Date(start.getFullYear(), start.getMonth(), 1);
+  while (cur <= end) {
+    months.push({ year: cur.getFullYear(), month: cur.getMonth() });
+    cur.setMonth(cur.getMonth()+1);
+  }
+  return months;
+}
+
+function getWorkingDays(year, month) {
+  const start = new Date(state.startDate);
+  const end = new Date(state.endDate);
+  const days = [];
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month+1, 0);
+  const from = first < start ? start : first;
+  const to = last > end ? end : last;
+  let cur = new Date(from);
+  while (cur <= to) {
+    if (!isWeekend(cur)) days.push(new Date(cur));
+    cur.setDate(cur.getDate()+1);
+  }
+  return days;
+}
+
+function getTotalHours(teacherIdx) {
+  let total = 0;
+  for (const dk in state.attendance) {
+    const day = state.attendance[dk];
+    if (day && day[teacherIdx] && day[teacherIdx].present) {
+      const h = parseFloat(day[teacherIdx].hours||"0")||0;
+      total += h;
+    }
+  }
+  return total;
+}
+
+function getActiveTeachers() {
+  return state.teachers.map((n,i)=>({name:n,idx:i})).filter(t=>t.name.trim()!=="");
+}
+
+// ---- RENDER ----
+function render() {
+  allMonths = generateMonths();
+  renderSummary();
+  renderMonthNav();
+  renderDays();
+  renderSettings();
+  document.getElementById('headerSub').textContent =
+    `A.S. ${new Date(state.startDate).getFullYear()}/${new Date(state.endDate).getFullYear()}`;
+}
+
+function renderSummary() {
+  const active = getActiveTeachers();
+  const container = document.getElementById('summaryCards');
+  container.innerHTML = '';
+  active.forEach(t=>{
+    const h = getTotalHours(t.idx);
+    const card = document.createElement('div');
+    card.className='s-card';
+    card.innerHTML=`<div class="s-name">${escHtml(t.name)}</div><div class="s-hours">${h%1===0?h:h.toFixed(1)}</div><div class="s-label">ore PRC</div>`;
+    container.appendChild(card);
+  });
+  if(active.length===0) container.innerHTML='<span style="color:#aaa;font-size:13px">Nessuna insegnante configurata</span>';
+}
+
+function renderMonthNav() {
+  const nav = document.getElementById('monthNav');
+  nav.innerHTML='';
+  allMonths.forEach((m,i)=>{
+    const btn = document.createElement('button');
+    btn.className='m-btn'+(i===currentMonthIndex?' active':'');
+    btn.textContent=MONTHS_IT[m.month].slice(0,3)+' '+String(m.year).slice(2);
+    btn.onclick=()=>{currentMonthIndex=i;renderMonthNav();renderDays();};
+    nav.appendChild(btn);
+  });
+}
+
+function renderDays() {
+  const container = document.getElementById('daysList');
+  container.innerHTML='';
+  if(!allMonths.length){container.innerHTML='<div class="empty-month"><p>Nessun giorno nel periodo configurato</p></div>';return;}
+  const {year,month} = allMonths[currentMonthIndex];
+  const days = getWorkingDays(year,month);
+  if(!days.length){container.innerHTML='<div class="empty-month"><p>Nessun giorno lavorativo in questo mese</p></div>';return;}
+  const active = getActiveTeachers();
+  days.forEach(d=>{
+    const dk = dateKey(d);
+    const holiday = getHoliday(dk);
+    const card = document.createElement('div');
+    card.className='day-card'+(holiday?' holiday':'');
+    card.id='card-'+dk;
+
+    const header = document.createElement('div');
+    header.className='day-header';
+    const left = document.createElement('div');
+    left.innerHTML=`<span class="day-weekday">${DAYS_FULL[d.getDay()]}</span><span class="day-date">${d.getDate()} ${MONTHS_IT[d.getMonth()]}</span>`;
+    header.appendChild(left);
+    if(holiday){const badge=document.createElement('span');badge.className='holiday-badge';badge.textContent=holiday;header.appendChild(badge);}
+    card.appendChild(header);
+
+    const row = document.createElement('div');
+    row.className='teachers-row';
+
+    active.forEach(t=>{
+      const att = (state.attendance[dk]||{})[t.idx]||{present:false,hours:""};
+      const wrap = document.createElement('div');
+      wrap.className='t-chip-wrap';
+
+      const chip = document.createElement('div');
+      chip.className='t-chip'+(att.present?(att.hours&&att.hours!=="0"?' hours-set':' present'):'');
+      chip.textContent = att.present && att.hours && att.hours!=="0" ? `${t.name.split(' ')[0]} ${att.hours}h` : t.name.split(' ')[0];
+      chip.dataset.dk=dk; chip.dataset.tidx=t.idx;
+      chip.onclick=()=>togglePresence(dk,t.idx);
+      chip.title=t.name;
+      wrap.appendChild(chip);
+
+      if(att.present){
+        const hw = document.createElement('div');
+        hw.className='hours-wrap';
+        const inp = document.createElement('input');
+        inp.type='number'; inp.min='0'; inp.max='12'; inp.step='0.5';
+        inp.className='hours-input';
+        inp.value=att.hours||'';
+        inp.placeholder='ore';
+        inp.dataset.dk=dk; inp.dataset.tidx=t.idx;
+        inp.oninput=(e)=>setHours(dk,t.idx,e.target.value);
+        inp.onblur=(e)=>setHours(dk,t.idx,e.target.value);
+        const unit=document.createElement('span');unit.className='hours-unit';unit.textContent='h';
+        hw.appendChild(inp); hw.appendChild(unit);
+        wrap.appendChild(hw);
+      }
+      row.appendChild(wrap);
+    });
+
+    if(!active.length){
+      const msg=document.createElement('span');
+      msg.style.cssText='font-size:12px;color:#aaa;padding:0 14px 12px';
+      msg.textContent='Configura le insegnanti nelle impostazioni';
+      row.appendChild(msg);
+    }
+
+    card.appendChild(row);
+    container.appendChild(card);
+  });
+}
+
+function renderSettings() {
+  const grid = document.getElementById('teacherGrid');
+  grid.innerHTML='';
+  for(let i=0;i<5;i++){
+    const g=document.createElement('div');g.className='input-group';
+    const label=document.createElement('label');label.textContent=`Insegnante ${i+1}`;
+    const inp=document.createElement('input');inp.type='text';inp.value=state.teachers[i]||'';
+    inp.placeholder=`Nome ${i+1}`;inp.id=`t-inp-${i}`;
+    g.appendChild(label);g.appendChild(inp);
+    grid.appendChild(g);
+  }
+  document.getElementById('startDate').value=state.startDate;
+  document.getElementById('endDate').value=state.endDate;
+}
+
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// ---- ACTIONS ----
+function toggleSettings(){
+  settingsOpen=!settingsOpen;
+  document.getElementById('settingsPanel').classList.toggle('open',settingsOpen);
+}
+
+function applySettings(){
+  for(let i=0;i<5;i++){
+    state.teachers[i]=document.getElementById(`t-inp-${i}`).value||'';
+  }
+  state.startDate=document.getElementById('startDate').value||state.startDate;
+  state.endDate=document.getElementById('endDate').value||state.endDate;
+  currentMonthIndex=0;
+  autoSave();
+  render();
+  toggleSettings();
+  showToast('✓ Impostazioni salvate');
+}
+
+function updateDates(){
+  state.startDate=document.getElementById('startDate').value||state.startDate;
+  state.endDate=document.getElementById('endDate').value||state.endDate;
+}
+
+function togglePresence(dk,tidx){
+  if(!state.attendance[dk]) state.attendance[dk]={};
+  if(!state.attendance[dk][tidx]) state.attendance[dk][tidx]={present:false,hours:""};
+  state.attendance[dk][tidx].present=!state.attendance[dk][tidx].present;
+  if(!state.attendance[dk][tidx].present) state.attendance[dk][tidx].hours="";
+  autoSave();
+  renderSummary();
+  // Update just this card
+  const card = document.getElementById('card-'+dk);
+  if(card){
+    const active=getActiveTeachers();
+    const holiday=getHoliday(dk);
+    const row=card.querySelector('.teachers-row');
+    row.innerHTML='';
+    const d=new Date(dk+'T12:00:00');
+    active.forEach(t=>{
+      const att=(state.attendance[dk]||{})[t.idx]||{present:false,hours:""};
+      const wrap=document.createElement('div');wrap.className='t-chip-wrap';
+      const chip=document.createElement('div');
+      chip.className='t-chip'+(att.present?(att.hours&&att.hours!=="0"?' hours-set':' present'):'');
+      chip.textContent=att.present&&att.hours&&att.hours!=="0"?`${t.name.split(' ')[0]} ${att.hours}h`:t.name.split(' ')[0];
+      chip.dataset.dk=dk;chip.dataset.tidx=t.idx;
+      chip.onclick=()=>togglePresence(dk,t.idx);chip.title=t.name;
+      wrap.appendChild(chip);
+      if(att.present){
+        const hw=document.createElement('div');hw.className='hours-wrap';
+        const inp=document.createElement('input');inp.type='number';inp.min='0';inp.max='12';inp.step='0.5';
+        inp.className='hours-input';inp.value=att.hours||'';inp.placeholder='ore';
+        inp.dataset.dk=dk;inp.dataset.tidx=t.idx;
+        inp.oninput=(e)=>setHours(dk,t.idx,e.target.value);
+        inp.onblur=(e)=>setHours(dk,t.idx,e.target.value);
+        const unit=document.createElement('span');unit.className='hours-unit';unit.textContent='h';
+        hw.appendChild(inp);hw.appendChild(unit);wrap.appendChild(hw);
+      }
+      row.appendChild(wrap);
+    });
+  }
+}
+
+function setHours(dk,tidx,val){
+  if(!state.attendance[dk]) state.attendance[dk]={};
+  if(!state.attendance[dk][tidx]) state.attendance[dk][tidx]={present:true,hours:""};
+  state.attendance[dk][tidx].hours=val;
+  autoSave();
+  // Update chip label without full re-render
+  const card=document.getElementById('card-'+dk);
+  if(card){
+    const chips=card.querySelectorAll('.t-chip');
+    chips.forEach(chip=>{
+      if(String(chip.dataset.tidx)===String(tidx)){
+        const tname=state.teachers[tidx]||'';
+        const fn=tname.split(' ')[0];
+        chip.textContent=val&&val!=="0"?`${fn} ${val}h`:fn;
+        chip.className='t-chip '+(val&&val!=="0"?'hours-set':'present');
+      }
+    });
+  }
+  renderSummary();
+}
+
+function confirmReset(){
+  if(confirm('Sei sicura di voler azzerare tutti i dati di presenza?\nQuesta azione non può essere annullata.')){
+    state.attendance={};
+    autoSave();
+    render();
+    showToast('🗑 Dati azzerati');
+  }
+}
+
+// ---- SAVE AS HTML ----
+function saveAsHTML(){
+  const stateJSON = JSON.stringify(state);
+  // Read current HTML source and replace the placeholder
+  const html = document.documentElement.outerHTML;
+  const updated = html.replace(
+    /var SAVED_STATE = [\s\S]*?; \/\/ __SAVED_STATE__/,
+    `var SAVED_STATE = ${stateJSON}; // __SAVED_STATE__`
+  );
+  const blob = new Blob([updated], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='Registro_PRC.html';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('💾 File salvato! Apri il file scaricato la prossima volta');
+}
+
+// ---- EXPORT CSV ----
+function exportCSV(){
+  const active=getActiveTeachers();
+  if(!active.length){showToast('Configura le insegnanti prima');return;}
+  let csv='Data,Giorno';
+  active.forEach(t=>{ csv+=`,${t.name} (pres.),${t.name} (ore)`; });
+  csv+='\n';
+  // Generate all working days
+  const start=new Date(state.startDate);
+  const end=new Date(state.endDate);
+  let cur=new Date(start);
+  while(cur<=end){
+    if(!isWeekend(cur)){
+      const dk=dateKey(cur);
+      let row=`${dk},${DAYS_FULL[cur.getDay()]}`;
+      active.forEach(t=>{
+        const att=(state.attendance[dk]||{})[t.idx]||{present:false,hours:""};
+        row+=`,${att.present?'X':''},${att.present?(att.hours||'0'):''}`;
+      });
+      csv+=row+'\n';
+    }
+    cur.setDate(cur.getDate()+1);
+  }
+  // Totals row
+  let totRow=`TOTALE,`;
+  active.forEach(t=>{totRow+=`,`,totRow+=`${getTotalHours(t.idx)}`;});
+  csv+=totRow+'\n';
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;
+  const now=new Date();
+  a.download=`PRC_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('📊 CSV esportato!');
+}
+
+// ---- IMPORT ----
+function importData(event){
+  const file=event.target.files[0];
+  if(!file){return;}
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    const content=e.target.result;
+    try{
+      if(file.name.endsWith('.html')){
+        // Extract SAVED_STATE from HTML
+        const match=content.match(/var SAVED_STATE = (\{[\s\S]*?\}); \/\/ __SAVED_STATE__/);
+        if(match){
+          const imported=JSON.parse(match[1]);
+          state=Object.assign(state,imported);
+          currentMonthIndex=0;
+          render();
+          showToast('✓ Dati importati correttamente');
+        } else {
+          showToast('⚠️ Nessun dato trovato nel file HTML');
+        }
+      } else if(file.name.endsWith('.json')){
+        const imported=JSON.parse(content);
+        state=Object.assign(state,imported);
+        currentMonthIndex=0;
+        render();
+        showToast('✓ Dati JSON importati');
+      }
+    }catch(err){
+      showToast('❌ Errore durante l\'importazione');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+  event.target.value='';
+}
+
+// ---- TOAST ----
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ---- INIT ----
+render();
+</script>
+
+
+</body></html>
