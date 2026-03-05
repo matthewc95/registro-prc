@@ -50,6 +50,12 @@
   .days-list{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
   .day-card{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid #f0f0f0}
   .day-card.holiday{border-color:#fde68a;background:#fffbeb}
+  .day-card.weekend{background:#f5f5f7;border-color:#e0e0e5}
+  .day-card.weekend .day-weekday{color:#a0a0ab}
+  .day-note{width:100%;padding:8px 11px;border:1.5px solid #e5e5ea;border-radius:10px;font-size:13px;font-family:inherit;background:#f9f9fb;resize:none;min-height:34px;color:#3c3c43;-webkit-appearance:none;outline:none;overflow:hidden}
+  .day-note:focus{border-color:#1a56db;background:#fff}
+  .day-note::placeholder{color:#c0c0c8}
+  .note-wrap{padding:0 14px 12px}
   .day-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px}
   .day-date{font-size:14px;font-weight:600;color:#1c1c1e}
   .day-weekday{font-size:12px;color:#8e8e93;margin-right:6px}
@@ -232,7 +238,7 @@ function getWorkingDays(year, month) {
   const to = last > end ? end : last;
   let cur = new Date(from);
   while (cur <= to) {
-    if (!isWeekend(cur)) days.push(new Date(cur));
+    days.push(new Date(cur));
     cur.setDate(cur.getDate()+1);
   }
   return days;
@@ -303,7 +309,8 @@ function renderDays() {
     const dk = dateKey(d);
     const holiday = getHoliday(dk);
     const card = document.createElement('div');
-    card.className='day-card'+(holiday?' holiday':'');
+    const weekend = isWeekend(d);
+    card.className='day-card'+(holiday?' holiday':weekend?' weekend':'');
     card.id='card-'+dk;
 
     const header = document.createElement('div');
@@ -356,6 +363,23 @@ function renderDays() {
     }
 
     card.appendChild(row);
+
+    // Note attività
+    const noteWrap = document.createElement('div');
+    noteWrap.className='note-wrap';
+    const noteInp = document.createElement('textarea');
+    noteInp.className='day-note';
+    noteInp.rows=1;
+    noteInp.placeholder='Descrizione attività…';
+    noteInp.value=(state.attendance[dk]||{}).note||'';
+    noteInp.dataset.dk=dk;
+    noteInp.oninput=function(){this.style.height='auto';this.style.height=this.scrollHeight+'px';setNote(dk,this.value);};
+    noteInp.onblur=(e)=>setNote(dk,e.target.value);
+    // Auto-resize on load if content exists
+    if(noteInp.value) setTimeout(()=>{noteInp.style.height='auto';noteInp.style.height=noteInp.scrollHeight+'px';},0);
+    noteWrap.appendChild(noteInp);
+    card.appendChild(noteWrap);
+
     container.appendChild(card);
   });
 }
@@ -461,6 +485,12 @@ function setHours(dk,tidx,val){
   renderSummary();
 }
 
+function setNote(dk,val){
+  if(!state.attendance[dk]) state.attendance[dk]={};
+  state.attendance[dk].note=val;
+  autoSave();
+}
+
 function confirmReset(){
   if(confirm('Sei sicura di voler azzerare tutti i dati di presenza?\nQuesta azione non può essere annullata.')){
     state.attendance={};
@@ -495,21 +525,21 @@ function exportCSV(){
   if(!active.length){showToast('Configura le insegnanti prima');return;}
   let csv='Data,Giorno';
   active.forEach(t=>{ csv+=`,${t.name} (pres.),${t.name} (ore)`; });
-  csv+='\n';
-  // Generate all working days
+  csv+=',Note\n';
+  // Generate all days in range
   const start=new Date(state.startDate);
   const end=new Date(state.endDate);
   let cur=new Date(start);
   while(cur<=end){
-    if(!isWeekend(cur)){
-      const dk=dateKey(cur);
-      let row=`${dk},${DAYS_FULL[cur.getDay()]}`;
-      active.forEach(t=>{
-        const att=(state.attendance[dk]||{})[t.idx]||{present:false,hours:""};
-        row+=`,${att.present?'X':''},${att.present?(att.hours||'0'):''}`;
-      });
-      csv+=row+'\n';
-    }
+    const dk=dateKey(cur);
+    let row=`${dk},${DAYS_FULL[cur.getDay()]}`;
+    active.forEach(t=>{
+      const att=(state.attendance[dk]||{})[t.idx]||{present:false,hours:""};
+      row+=`,${att.present?'X':''},${att.present?(att.hours||'0'):''}`;
+    });
+    const note=((state.attendance[dk]||{}).note||'').replace(/"/g,'""');
+    row+=`,"${note}"`;
+    csv+=row+'\n';
     cur.setDate(cur.getDate()+1);
   }
   // Totals row
